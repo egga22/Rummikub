@@ -1,0 +1,40 @@
+.tile-set {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 4px;
+  margin: 8px;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.tile-set.valid {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.tile-set.invalid {
+  border-color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.tile-set .tile {
+  margin: 0 2px;
+}
+
+.drop-zone {
+  width: 8px;
+  min-height: 55px;
+  transition: width 0.2s, background-color 0.2s;
+  border-radius: 4px;
+}
+
+.drop-zone.active {
+  width: 20px;
+  background: rgba(255, 215, 0, 0.5);
+}
+
+.drop-zone.end {
+  width: 20px;
+}
