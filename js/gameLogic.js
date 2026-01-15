@@ -24,7 +24,10 @@ class GameLogic {
         });
         
         // Check for consecutive numbers (jokers can fill gaps)
-        let expectedNumber = sorted.find(t => !t.isJoker).number;
+        const firstNonJoker = sorted.find(t => !t.isJoker);
+        if (!firstNonJoker) return false;
+        
+        let expectedNumber = firstNonJoker.number;
         let jokerCount = 0;
         
         for (const tile of sorted) {
@@ -45,8 +48,9 @@ class GameLogic {
         }
         
         // Check if run doesn't exceed 13
-        const firstNumber = sorted.find(t => !t.isJoker).number;
-        return firstNumber + tiles.length - 1 <= 13;
+        const firstTile = sorted.find(t => !t.isJoker);
+        if (!firstTile) return false;
+        return firstTile.number + tiles.length - 1 <= 13;
     }
 
     // Validate if tiles form a valid group (same number, different colors)

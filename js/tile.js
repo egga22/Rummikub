@@ -8,7 +8,7 @@ class Tile {
     }
 
     generateId() {
-        return `tile-${this.color}-${this.number}-${Math.random().toString(36).substr(2, 9)}`;
+        return `tile-${this.color}-${this.number}-${Math.random().toString(36).substring(2, 11)}`;
     }
 
     getValue() {
