@@ -96,10 +96,11 @@ export const Game: React.FC = () => {
   const handleSettingsChange = (newSettings: Parameters<typeof updateSettings>[0]) => {
     updateSettings(newSettings);
     // Adjust player names array if needed
-    if (newSettings.numberOfPlayers) {
+    if (newSettings.numberOfPlayers !== undefined) {
+      const numPlayers = newSettings.numberOfPlayers;
       setPlayerNames(prev => {
         const newNames = [...prev];
-        while (newNames.length < newSettings.numberOfPlayers!) {
+        while (newNames.length < numPlayers) {
           newNames.push(`Player ${newNames.length + 1}`);
         }
         return newNames;

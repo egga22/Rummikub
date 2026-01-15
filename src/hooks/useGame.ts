@@ -366,12 +366,20 @@ export function useGame(): UseGameReturn {
     const currentPlayer = gameState.players[gameState.currentPlayerIndex];
     const tilesPlayed = gameState.turnStartHand.length - currentPlayer.hand.length;
     
-    // Must have played at least one tile or board must be unchanged
-    if (tilesPlayed === 0 && gameState.board.length === gameState.turnStartBoard.length) {
-      return false;
+    // If tiles were played from hand, require board to be valid
+    if (tilesPlayed > 0) {
+      return isBoardValid(gameState.board);
     }
     
-    return isBoardValid(gameState.board);
+    // If no tiles were played but board was rearranged, still allow ending turn if valid
+    // Check if any manipulation occurred by comparing board structure
+    const boardChanged = JSON.stringify(gameState.board) !== JSON.stringify(gameState.turnStartBoard);
+    if (boardChanged) {
+      return isBoardValid(gameState.board);
+    }
+    
+    // No changes made - can't end turn (must draw or play)
+    return false;
   }, [gameState]);
 
   return {
