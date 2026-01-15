@@ -1,0 +1,61 @@
+.settings-panel {
+  background: linear-gradient(135deg, #263238 0%, #37474f 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+.settings-panel h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  text-align: center;
+  color: #ffd700;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.setting-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.setting-row label {
+  font-size: 0.95rem;
+}
+
+.setting-row select,
+.setting-row input {
+  background: #455a64;
+  border: 1px solid #607d8b;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+
+.setting-row select:disabled,
+.setting-row input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.setting-row select:focus,
+.setting-row input:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+
+.setting-row input[type="number"] {
+  width: 80px;
+  text-align: center;
+}
