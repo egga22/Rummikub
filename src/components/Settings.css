@@ -16,11 +16,13 @@
 
 .setting-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
   padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 8px;
 }
 
 .setting-row:last-child {
@@ -58,4 +60,9 @@
 .setting-row input[type="number"] {
   width: 80px;
   text-align: center;
+}
+
+.setting-row .custom-input {
+  width: 100px;
+  margin-left: auto;
 }

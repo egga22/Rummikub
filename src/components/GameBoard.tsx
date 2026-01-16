@@ -31,7 +31,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     const tileId = e.dataTransfer.getData('tileId');
     
     // Only handle drop on empty board area (not on existing sets)
-    if (e.target === e.currentTarget && tileId) {
+    // Check if the drop target is the board or its placeholder children
+    const target = e.target as HTMLElement;
+    const isValidDropTarget = target.classList.contains('game-board') || 
+                              target.classList.contains('board-placeholder') ||
+                              target.closest('.board-placeholder') !== null;
+    
+    if (isValidDropTarget && tileId) {
       onTileDrop(tileId, null, 0);
     }
     setIsDragOver(false);
