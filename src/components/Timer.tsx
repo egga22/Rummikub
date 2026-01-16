@@ -23,6 +23,13 @@ export const Timer: React.FC<TimerProps> = ({
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
 
+  // Reset timer when totalTime changes
+  // Note: In practice, the parent uses key={turnStartTime} to force remount,
+  // but this provides a fallback for other use cases
+  useEffect(() => {
+    setTimeLeft(totalTime);
+  }, [totalTime]);
+
   // Countdown logic
   useEffect(() => {
     if (!isActive) return;
