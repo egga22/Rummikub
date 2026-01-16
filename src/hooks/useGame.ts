@@ -67,6 +67,14 @@ export function useGame(): UseGameReturn {
     setGameState(prev => {
       if (!prev) return prev;
       const newState = cloneGameState(prev);
+      
+      // Reset board and hand to turn start before drawing
+      newState.board = newState.turnStartBoard.map(set => ({
+        ...set,
+        tiles: [...set.tiles],
+      }));
+      newState.players[newState.currentPlayerIndex].hand = [...newState.turnStartHand];
+      
       const { drawn, remaining } = drawTiles(newState.pool, 1);
       
       const currentPlayer = newState.players[newState.currentPlayerIndex];

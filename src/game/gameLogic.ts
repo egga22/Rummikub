@@ -238,7 +238,7 @@ export function cloneGameState(state: GameState): GameState {
   return JSON.parse(JSON.stringify(state));
 }
 
-// Sort tiles for display in hand
+// Sort tiles for display in hand (color first, then number)
 export function sortTiles(tiles: Tile[]): Tile[] {
   return [...tiles].sort((a, b) => {
     // Jokers at the end
@@ -252,5 +252,22 @@ export function sortTiles(tiles: Tile[]): Tile[] {
     if (colorDiff !== 0) return colorDiff;
     
     return a.number - b.number;
+  });
+}
+
+// Sort tiles by number first, then by color
+export function sortTilesByNumber(tiles: Tile[]): Tile[] {
+  return [...tiles].sort((a, b) => {
+    // Jokers at the end
+    if (a.isJoker && !b.isJoker) return 1;
+    if (!a.isJoker && b.isJoker) return -1;
+    if (a.isJoker && b.isJoker) return 0;
+    
+    // Sort by number, then by color
+    const numberDiff = a.number - b.number;
+    if (numberDiff !== 0) return numberDiff;
+    
+    const colorOrder = { red: 0, blue: 1, orange: 2, black: 3 };
+    return colorOrder[a.color] - colorOrder[b.color];
   });
 }
