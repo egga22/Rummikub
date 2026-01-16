@@ -13,16 +13,26 @@ export const Settings: React.FC<SettingsProps> = ({
   onSettingsChange,
   disabled = false,
 }) => {
-  const [showCustomMinimumMeld, setShowCustomMinimumMeld] = useState(false);
-  const [showCustomNumberOfJokers, setShowCustomNumberOfJokers] = useState(false);
-  const [showCustomTimePerTurn, setShowCustomTimePerTurn] = useState(false);
+  const [customModeMinimumMeld, setCustomModeMinimumMeld] = useState(false);
+  const [customModeNumberOfJokers, setCustomModeNumberOfJokers] = useState(false);
+  const [customModeTimePerTurn, setCustomModeTimePerTurn] = useState(false);
+
+  // Check if current values match predefined options
+  const isMinimumMeldPredefined = [0, 30, 40, 50].includes(settings.minimumInitialMeldValue);
+  const isNumberOfJokersPredefined = [0, 2, 4].includes(settings.numberOfJokers);
+  const isTimePerTurnPredefined = settings.timePerTurn === null || [30, 60, 120, 300].includes(settings.timePerTurn);
+
+  // Determine if custom input should be shown
+  const showCustomMinimumMeld = customModeMinimumMeld || !isMinimumMeldPredefined;
+  const showCustomNumberOfJokers = customModeNumberOfJokers || !isNumberOfJokersPredefined;
+  const showCustomTimePerTurn = customModeTimePerTurn || !isTimePerTurnPredefined;
 
   const handleMinimumMeldChange = (value: string) => {
     if (value === 'custom') {
-      setShowCustomMinimumMeld(true);
+      setCustomModeMinimumMeld(true);
       return;
     }
-    setShowCustomMinimumMeld(false);
+    setCustomModeMinimumMeld(false);
     onSettingsChange({ minimumInitialMeldValue: parseInt(value) });
   };
 
@@ -35,10 +45,10 @@ export const Settings: React.FC<SettingsProps> = ({
 
   const handleNumberOfJokersChange = (value: string) => {
     if (value === 'custom') {
-      setShowCustomNumberOfJokers(true);
+      setCustomModeNumberOfJokers(true);
       return;
     }
-    setShowCustomNumberOfJokers(false);
+    setCustomModeNumberOfJokers(false);
     onSettingsChange({ numberOfJokers: parseInt(value) });
   };
 
@@ -51,10 +61,10 @@ export const Settings: React.FC<SettingsProps> = ({
 
   const handleTimePerTurnChange = (value: string) => {
     if (value === 'custom') {
-      setShowCustomTimePerTurn(true);
+      setCustomModeTimePerTurn(true);
       return;
     }
-    setShowCustomTimePerTurn(false);
+    setCustomModeTimePerTurn(false);
     onSettingsChange({ 
       timePerTurn: value === 'none' ? null : parseInt(value) 
     });
