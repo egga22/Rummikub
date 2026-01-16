@@ -2,6 +2,7 @@ import type { Tile, TileColor, TileSet, Player, GameState, GameSettings } from '
 import { DEFAULT_SETTINGS } from '../types/game';
 
 const COLORS: TileColor[] = ['red', 'blue', 'orange', 'black'];
+const COLOR_ORDER: Record<TileColor, number> = { red: 0, blue: 1, orange: 2, black: 3 };
 
 // Generate a unique ID
 export function generateId(): string {
@@ -238,7 +239,7 @@ export function cloneGameState(state: GameState): GameState {
   return JSON.parse(JSON.stringify(state));
 }
 
-// Sort tiles for display in hand
+// Sort tiles for display in hand (color first, then number)
 export function sortTiles(tiles: Tile[]): Tile[] {
   return [...tiles].sort((a, b) => {
     // Jokers at the end
@@ -247,10 +248,25 @@ export function sortTiles(tiles: Tile[]): Tile[] {
     if (a.isJoker && b.isJoker) return 0;
     
     // Sort by color, then by number
-    const colorOrder = { red: 0, blue: 1, orange: 2, black: 3 };
-    const colorDiff = colorOrder[a.color] - colorOrder[b.color];
+    const colorDiff = COLOR_ORDER[a.color] - COLOR_ORDER[b.color];
     if (colorDiff !== 0) return colorDiff;
     
     return a.number - b.number;
+  });
+}
+
+// Sort tiles by number first, then by color
+export function sortTilesByNumber(tiles: Tile[]): Tile[] {
+  return [...tiles].sort((a, b) => {
+    // Jokers at the end
+    if (a.isJoker && !b.isJoker) return 1;
+    if (!a.isJoker && b.isJoker) return -1;
+    if (a.isJoker && b.isJoker) return 0;
+    
+    // Sort by number, then by color
+    const numberDiff = a.number - b.number;
+    if (numberDiff !== 0) return numberDiff;
+    
+    return COLOR_ORDER[a.color] - COLOR_ORDER[b.color];
   });
 }
