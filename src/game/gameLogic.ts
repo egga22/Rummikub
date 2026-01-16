@@ -2,6 +2,7 @@ import type { Tile, TileColor, TileSet, Player, GameState, GameSettings } from '
 import { DEFAULT_SETTINGS } from '../types/game';
 
 const COLORS: TileColor[] = ['red', 'blue', 'orange', 'black'];
+const COLOR_ORDER: Record<TileColor, number> = { red: 0, blue: 1, orange: 2, black: 3 };
 
 // Generate a unique ID
 export function generateId(): string {
@@ -247,8 +248,7 @@ export function sortTiles(tiles: Tile[]): Tile[] {
     if (a.isJoker && b.isJoker) return 0;
     
     // Sort by color, then by number
-    const colorOrder = { red: 0, blue: 1, orange: 2, black: 3 };
-    const colorDiff = colorOrder[a.color] - colorOrder[b.color];
+    const colorDiff = COLOR_ORDER[a.color] - COLOR_ORDER[b.color];
     if (colorDiff !== 0) return colorDiff;
     
     return a.number - b.number;
@@ -267,7 +267,6 @@ export function sortTilesByNumber(tiles: Tile[]): Tile[] {
     const numberDiff = a.number - b.number;
     if (numberDiff !== 0) return numberDiff;
     
-    const colorOrder = { red: 0, blue: 1, orange: 2, black: 3 };
-    return colorOrder[a.color] - colorOrder[b.color];
+    return COLOR_ORDER[a.color] - COLOR_ORDER[b.color];
   });
 }
