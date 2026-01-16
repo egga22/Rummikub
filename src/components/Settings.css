@@ -66,3 +66,16 @@
   width: 100px;
   margin-left: auto;
 }
+
+.setting-row .format-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.setting-row .format-hint {
+  width: 100%;
+  font-size: 0.75rem;
+  color: #b0bec5;
+  margin-top: 4px;
+  font-style: italic;
+}

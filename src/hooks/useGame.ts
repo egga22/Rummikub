@@ -34,6 +34,10 @@ export interface UseGameReturn {
   updateSettings: (settings: Partial<GameSettings>) => void;
   settings: GameSettings;
   
+  // Timer
+  turnStartTime: number; // Timestamp when current turn started
+  onTimerExpired: () => void;
+  
   // Helpers
   currentPlayer: () => Tile[] | null;
   isCurrentPlayerTurn: (playerId: string) => boolean;
@@ -45,17 +49,20 @@ export function useGame(): UseGameReturn {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
   const [message, setMessage] = useState<string>('Start a new game!');
+  const [turnStartTime, setTurnStartTime] = useState<number>(0);
 
   const startGame = useCallback((playerNames: string[], customSettings?: GameSettings) => {
     const gameSettings = customSettings || settings;
     const newGame = initializeGame(playerNames, gameSettings);
     setGameState(newGame);
     setMessage(`${playerNames[0]}'s turn`);
+    setTurnStartTime(Date.now());
   }, [settings]);
 
   const resetGame = useCallback(() => {
     setGameState(null);
     setMessage('Start a new game!');
+    setTurnStartTime(Date.now());
   }, []);
 
   const drawTile = useCallback(() => {
@@ -90,6 +97,7 @@ export function useGame(): UseGameReturn {
     });
     
     setMessage(`Drew a tile. Next player's turn.`);
+    setTurnStartTime(Date.now());
   }, [gameState]);
 
   const endTurn = useCallback((): boolean => {
@@ -161,6 +169,7 @@ export function useGame(): UseGameReturn {
     });
 
     setMessage(`${gameState.players[(gameState.currentPlayerIndex + 1) % gameState.players.length].name}'s turn`);
+    setTurnStartTime(Date.now());
     return true;
   }, [gameState]);
 
@@ -390,6 +399,13 @@ export function useGame(): UseGameReturn {
     return false;
   }, [gameState]);
 
+  const onTimerExpired = useCallback(() => {
+    if (!gameState || gameState.status !== 'playing') return;
+    
+    setMessage('Time expired! Drawing a tile...');
+    drawTile();
+  }, [gameState, drawTile]);
+
   return {
     gameState,
     startGame,
@@ -405,6 +421,8 @@ export function useGame(): UseGameReturn {
     mergeIntoSet,
     updateSettings,
     settings,
+    turnStartTime,
+    onTimerExpired,
     currentPlayer,
     isCurrentPlayerTurn,
     canEndTurn,

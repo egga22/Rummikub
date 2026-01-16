@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { GameSettings } from '../types/game';
+import { TIME_FORMAT_VARIABLES } from '../utils/timeFormat';
 import './Settings.css';
 
 interface SettingsProps {
@@ -188,6 +189,24 @@ export const Settings: React.FC<SettingsProps> = ({
           />
         )}
       </div>
+
+      {settings.timePerTurn !== null && (
+        <div className="setting-row">
+          <label htmlFor="timeFormat">Time Display Format</label>
+          <input
+            id="timeFormat"
+            type="text"
+            value={settings.timeFormat}
+            onChange={(e) => onSettingsChange({ timeFormat: e.target.value })}
+            placeholder="{minutes}:{seconds} ({percent}%)"
+            disabled={disabled}
+            className="format-input"
+          />
+          <small className="format-hint">
+            Variables: {TIME_FORMAT_VARIABLES.join(', ')}
+          </small>
+        </div>
+      )}
     </div>
   );
 };

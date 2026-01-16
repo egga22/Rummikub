@@ -3,6 +3,7 @@ import { useGame } from '../hooks/useGame';
 import { GameBoard } from './GameBoard';
 import { PlayerHand } from './PlayerHand';
 import { Settings } from './Settings';
+import { Timer } from './Timer';
 import './Game.css';
 
 export const Game: React.FC = () => {
@@ -20,6 +21,8 @@ export const Game: React.FC = () => {
     settings,
     canEndTurn,
     message,
+    turnStartTime,
+    onTimerExpired,
   } = useGame();
 
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
@@ -160,6 +163,15 @@ export const Game: React.FC = () => {
       <div className="game-header">
         <h1>🎮 Rummikub</h1>
         <div className="game-info">
+          {gameState.settings.timePerTurn && (
+            <Timer
+              key={turnStartTime}
+              totalTime={gameState.settings.timePerTurn}
+              onTimeUp={onTimerExpired}
+              formatString={gameState.settings.timeFormat}
+              isActive={gameState.status === 'playing'}
+            />
+          )}
           <span className="pool-count">Pool: {gameState.pool.length} tiles</span>
           <span className="message">{message}</span>
         </div>
