@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { formatTimeLeft } from '../utils/timeFormat';
 import './Timer.css';
 
@@ -16,6 +16,12 @@ export const Timer: React.FC<TimerProps> = ({
   isActive,
 }) => {
   const [timeLeft, setTimeLeft] = useState(totalTime);
+  const onTimeUpRef = useRef(onTimeUp);
+
+  // Keep onTimeUp ref updated
+  useEffect(() => {
+    onTimeUpRef.current = onTimeUp;
+  }, [onTimeUp]);
 
   // Reset timer when totalTime changes (new turn starts)
   useEffect(() => {
@@ -24,12 +30,12 @@ export const Timer: React.FC<TimerProps> = ({
 
   // Countdown logic
   useEffect(() => {
-    if (!isActive || timeLeft <= 0) return;
+    if (!isActive) return;
 
     const interval = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          onTimeUp();
+          onTimeUpRef.current();
           return 0;
         }
         return prev - 1;
@@ -37,7 +43,7 @@ export const Timer: React.FC<TimerProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isActive, timeLeft, onTimeUp]);
+  }, [isActive]);
 
   // Calculate warning states
   const percent = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;

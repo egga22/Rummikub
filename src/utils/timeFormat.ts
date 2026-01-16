@@ -20,10 +20,10 @@ export function formatTimeLeft(
     : 0;
 
   return formatString
-    .replace('{minutes}', minutes.toString().padStart(2, '0'))
-    .replace('{seconds}', seconds.toString().padStart(2, '0'))
-    .replace('{totalSeconds}', timeLeftSeconds.toString())
-    .replace('{percent}', percent.toString())
-    .replace('{m}', minutes.toString())
-    .replace('{s}', seconds.toString());
+    .replaceAll('{minutes}', minutes.toString().padStart(2, '0'))
+    .replaceAll('{seconds}', seconds.toString().padStart(2, '0'))
+    .replaceAll('{totalSeconds}', timeLeftSeconds.toString())
+    .replaceAll('{percent}', percent.toString())
+    .replaceAll('{m}', minutes.toString())
+    .replaceAll('{s}', seconds.toString());
 }
