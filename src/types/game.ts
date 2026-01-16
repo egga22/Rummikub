@@ -32,6 +32,7 @@ export interface GameSettings {
   tilesPerColor: number; // How many copies of each number per color (default 2)
   numberOfJokers: number;
   timePerTurn: number | null; // In seconds, null for no limit
+  timeFormat: string; // Format string for displaying time (supports {minutes}, {seconds}, {totalSeconds}, {percent}, {m}, {s})
 }
 
 // Current game state
@@ -69,4 +70,5 @@ export const DEFAULT_SETTINGS: GameSettings = {
   tilesPerColor: 2,
   numberOfJokers: 2,
   timePerTurn: null,
+  timeFormat: '{minutes}:{seconds} ({percent}%)',
 };

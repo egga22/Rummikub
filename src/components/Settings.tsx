@@ -188,6 +188,24 @@ export const Settings: React.FC<SettingsProps> = ({
           />
         )}
       </div>
+
+      {settings.timePerTurn !== null && (
+        <div className="setting-row">
+          <label htmlFor="timeFormat">Time Display Format</label>
+          <input
+            id="timeFormat"
+            type="text"
+            value={settings.timeFormat}
+            onChange={(e) => onSettingsChange({ timeFormat: e.target.value })}
+            placeholder="{minutes}:{seconds} ({percent}%)"
+            disabled={disabled}
+            className="format-input"
+          />
+          <small className="format-hint">
+            Variables: {'{minutes}'}, {'{seconds}'}, {'{totalSeconds}'}, {'{percent}'}, {'{m}'}, {'{s}'}
+          </small>
+        </div>
+      )}
     </div>
   );
 };
