@@ -23,11 +23,6 @@ export const Timer: React.FC<TimerProps> = ({
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
 
-  // Reset timer when totalTime changes (new turn starts)
-  useEffect(() => {
-    setTimeLeft(totalTime);
-  }, [totalTime]);
-
   // Countdown logic
   useEffect(() => {
     if (!isActive) return;

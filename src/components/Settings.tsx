@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { GameSettings } from '../types/game';
+import { TIME_FORMAT_VARIABLES } from '../utils/timeFormat';
 import './Settings.css';
 
 interface SettingsProps {
@@ -202,7 +203,7 @@ export const Settings: React.FC<SettingsProps> = ({
             className="format-input"
           />
           <small className="format-hint">
-            Variables: {'{minutes}'}, {'{seconds}'}, {'{totalSeconds}'}, {'{percent}'}, {'{m}'}, {'{s}'}
+            Variables: {TIME_FORMAT_VARIABLES.join(', ')}
           </small>
         </div>
       )}

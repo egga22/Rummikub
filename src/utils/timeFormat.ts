@@ -8,6 +8,16 @@
  * - {m} - Minutes without padding
  * - {s} - Seconds within the current minute without padding
  */
+
+export const TIME_FORMAT_VARIABLES = [
+  '{minutes}',
+  '{seconds}',
+  '{totalSeconds}',
+  '{percent}',
+  '{m}',
+  '{s}',
+] as const;
+
 export function formatTimeLeft(
   timeLeftSeconds: number,
   totalTimeSeconds: number,
@@ -19,10 +29,11 @@ export function formatTimeLeft(
     ? Math.round((timeLeftSeconds / totalTimeSeconds) * 100)
     : 0;
 
+  // Process longer variable names first to avoid substring replacement issues
   return formatString
+    .replaceAll('{totalSeconds}', timeLeftSeconds.toString())
     .replaceAll('{minutes}', minutes.toString().padStart(2, '0'))
     .replaceAll('{seconds}', seconds.toString().padStart(2, '0'))
-    .replaceAll('{totalSeconds}', timeLeftSeconds.toString())
     .replaceAll('{percent}', percent.toString())
     .replaceAll('{m}', minutes.toString())
     .replaceAll('{s}', seconds.toString());
