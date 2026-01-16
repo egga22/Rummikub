@@ -49,7 +49,7 @@ export function useGame(): UseGameReturn {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
   const [message, setMessage] = useState<string>('Start a new game!');
-  const [turnStartTime, setTurnStartTime] = useState<number>(Date.now());
+  const [turnStartTime, setTurnStartTime] = useState<number>(0);
 
   const startGame = useCallback((playerNames: string[], customSettings?: GameSettings) => {
     const gameSettings = customSettings || settings;
