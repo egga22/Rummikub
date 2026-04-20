@@ -3,6 +3,7 @@ import { useGame } from '../hooks/useGame';
 import { GameBoard } from './GameBoard';
 import { PlayerHand } from './PlayerHand';
 import { Settings } from './Settings';
+import { Timer } from './Timer';
 import './Game.css';
 
 export const Game: React.FC = () => {
@@ -16,6 +17,7 @@ export const Game: React.FC = () => {
     placeTileFromHand,
     moveTileOnBoard,
     returnTileToHand,
+    createNewSet,
     updateSettings,
     settings,
     canEndTurn,
@@ -84,6 +86,16 @@ export const Game: React.FC = () => {
       returnTileToHand(tileId, setId);
     }
   };
+
+  const handleCreateSet = () => {
+    if (selectedTiles.length === 0) return;
+    createNewSet(selectedTiles);
+    setSelectedTiles([]);
+  };
+
+  const handleTimerExpire = useCallback(() => {
+    drawTile();
+  }, [drawTile]);
 
   const handlePlayerNameChange = (index: number, name: string) => {
     setPlayerNames(prev => {
@@ -162,6 +174,13 @@ export const Game: React.FC = () => {
         <div className="game-info">
           <span className="pool-count">Pool: {gameState.pool.length} tiles</span>
           <span className="message">{message}</span>
+          {gameState.settings.timePerTurn !== null && (
+            <Timer
+              key={`${gameState.currentPlayerIndex}-${gameState.id}`}
+              seconds={gameState.settings.timePerTurn}
+              onExpire={handleTimerExpire}
+            />
+          )}
         </div>
       </div>
 
@@ -197,6 +216,24 @@ export const Game: React.FC = () => {
             >
               Reset Turn ↩️
             </button>
+            {selectedTiles.length > 0 && (
+              <>
+                <button
+                  className="create-set-btn"
+                  onClick={handleCreateSet}
+                  title="Create a new set on the board from your selected tiles"
+                >
+                  Create Set ({selectedTiles.length}) 🃏
+                </button>
+                <button
+                  className="clear-selection-btn"
+                  onClick={() => setSelectedTiles([])}
+                  title="Deselect all tiles"
+                >
+                  Clear ✕
+                </button>
+              </>
+            )}
             <button 
               className="end-turn-btn"
               onClick={endTurn}
