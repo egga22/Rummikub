@@ -167,6 +167,17 @@
   color: white;
 }
 
+.create-set-btn {
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+  color: white;
+}
+
+.clear-selection-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 /* Players Area */
 .players-area {
   margin-top: 20px;
