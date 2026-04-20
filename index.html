@@ -1,13 +1,997 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>rummikub-game</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rummikub</title>
+  <style>
+    /* ── index.css ── */
+    :root {
+      font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      font-weight: 400;
+      color-scheme: dark;
+      color: rgba(255,255,255,0.87);
+      background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #1565c0 100%);
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; min-height: 100vh; }
+    h1,h2,h3,h4,h5,h6 { margin: 0; }
+    button {
+      border-radius: 8px;
+      border: 1px solid transparent;
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.25s, transform 0.1s;
+    }
+    button:focus, button:focus-visible { outline: 2px solid #ffd700; outline-offset: 2px; }
+
+    /* ── Game.css ── */
+    .game-container { max-width: 1200px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+    .game-header { text-align: center; margin-bottom: 20px; }
+    .game-header h1 { margin: 0; font-size: 2.5rem; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+    .game-header p { margin: 8px 0 0; color: rgba(255,255,255,0.7); }
+    .game-info { display: flex; justify-content: center; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+    .pool-count { background: rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; }
+    .message { background: rgba(255,215,0,0.2); padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; color: #ffd700; }
+    .setup-panel { max-width: 500px; margin: 0 auto; background: linear-gradient(135deg, #1e3a5f 0%, #2e4a6f 100%); border-radius: 16px; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .toggle-settings-btn { width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; font-size: 1rem; cursor: pointer; margin-bottom: 20px; transition: background 0.2s; }
+    .toggle-settings-btn:hover { background: rgba(255,255,255,0.2); }
+    .player-names-setup { margin: 20px 0; }
+    .player-names-setup h3 { color: #ffd700; margin-bottom: 12px; }
+    .player-name-input { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .player-name-input label { color: rgba(255,255,255,0.8); }
+    .player-name-input input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 8px 12px; color: white; font-size: 1rem; width: 200px; }
+    .player-name-input input:focus { outline: none; border-color: #ffd700; }
+    .start-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); border: none; border-radius: 12px; color: white; font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(76,175,80,0.3); }
+    .start-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76,175,80,0.4); }
+    .turn-controls { display: flex; justify-content: center; gap: 16px; margin: 20px 0; flex-wrap: wrap; }
+    .turn-controls button { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: transform 0.2s, opacity 0.2s; }
+    .turn-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .turn-controls button:not(:disabled):hover { transform: translateY(-2px); }
+    .draw-btn    { background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); color: white; }
+    .reset-btn   { background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; }
+    .end-turn-btn{ background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); color: white; }
+    .create-set-btn { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: white; }
+    .clear-selection-btn { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.3); }
+    .players-area { margin-top: 20px; }
+    .game-over { text-align: center; background: linear-gradient(135deg, #1e3a5f 0%, #2e4a6f 100%); border-radius: 16px; padding: 40px; margin-top: 40px; }
+    .game-over h2 { font-size: 2.5rem; color: #ffd700; margin-bottom: 16px; }
+    .winner-message { font-size: 1.5rem; color: white; margin-bottom: 30px; }
+    .new-game-btn { padding: 16px 32px; background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); border: none; border-radius: 12px; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+    .new-game-btn:hover { transform: translateY(-2px); }
+    .quit-btn { display: block; margin: 30px auto 0; padding: 10px 24px; background: rgba(244,67,54,0.2); border: 1px solid #f44336; border-radius: 8px; color: #f44336; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; }
+    .quit-btn:hover { background: rgba(244,67,54,0.3); }
+
+    /* ── GameBoard.css ── */
+    .game-board { background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #1b5e20 100%); border-radius: 12px; min-height: 300px; padding: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.3); border: 4px solid #5d4037; transition: background-color 0.2s; }
+    .game-board.drag-over { background: linear-gradient(135deg, #2e7d32 0%, #388e3c 50%, #2e7d32 100%); }
+    .board-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 260px; color: rgba(255,255,255,0.5); text-align: center; }
+    .board-placeholder p { margin: 8px 0; font-size: 1.1rem; }
+    .board-placeholder .hint { font-size: 0.9rem; max-width: 400px; }
+    .board-sets { display: flex; flex-wrap: wrap; gap: 8px; min-height: 260px; }
+
+    /* ── Tile.css ── */
+    .tile { width: 40px; height: 55px; background: linear-gradient(135deg, #f5f5f0 0%, #e8e8e0 100%); border: 2px solid #8b7355; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: grab; user-select: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.5); transition: transform 0.1s, box-shadow 0.1s; font-weight: bold; font-size: 1.2rem; flex-shrink: 0; }
+    .tile:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5); }
+    .tile:active { cursor: grabbing; transform: scale(1.05); }
+    .tile.selected { border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.5), 0 2px 4px rgba(0,0,0,0.2); }
+    .tile.red    .tile-number { color: #d32f2f; }
+    .tile.blue   .tile-number { color: #1976d2; }
+    .tile.orange .tile-number { color: #f57c00; }
+    .tile.black  .tile-number { color: #212121; }
+    .tile.joker { background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%); }
+    .tile.joker .joker-symbol { font-size: 1.5rem; }
+    .tile.joker.red   .joker-symbol { color: #d32f2f; }
+    .tile.joker.black .joker-symbol { color: #212121; }
+    .tile-number { font-family: 'Georgia', serif; font-size: 1.3rem; font-weight: bold; text-shadow: 1px 1px 1px rgba(255,255,255,0.8); }
+
+    /* ── TileSet.css ── */
+    .tile-set { display: flex; align-items: center; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 4px; margin: 8px; border: 2px solid transparent; transition: border-color 0.2s, background-color 0.2s; }
+    .tile-set.valid   { border-color: #4caf50; background: rgba(76,175,80,0.1); }
+    .tile-set.invalid { border-color: #f44336; background: rgba(244,67,54,0.1); }
+    .tile-set .tile { margin: 0 2px; }
+    .drop-zone { width: 8px; min-height: 55px; transition: width 0.2s, background-color 0.2s; border-radius: 4px; flex-shrink: 0; }
+    .drop-zone.active { width: 20px; background: rgba(255,215,0,0.5); }
+    .drop-zone.end { width: 20px; }
+
+    /* ── PlayerHand.css ── */
+    .player-hand { background: linear-gradient(135deg, #37474f 0%, #455a64 100%); border-radius: 12px; padding: 16px; margin: 16px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: opacity 0.3s; border: 2px solid transparent; }
+    .player-hand.inactive { opacity: 0.6; }
+    .player-hand.active { border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+    .player-info { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; color: white; flex-wrap: wrap; }
+    .player-info h3 { margin: 0; font-size: 1.2rem; }
+    .turn-indicator { background: #ffd700; color: #212121; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
+    .tile-count { background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 8px; font-size: 0.85rem; }
+    .sort-buttons { display: flex; gap: 6px; margin-left: auto; }
+    .sort-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+    .sort-btn:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.5); }
+    .sort-btn.active { background: #4caf50; border-color: #388e3c; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .hand-tiles { display: flex; flex-wrap: wrap; gap: 6px; min-height: 60px; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+    .hidden-tiles { display: flex; flex-wrap: wrap; gap: 6px; }
+    .hidden-tile { width: 40px; height: 55px; background: linear-gradient(135deg, #8d6e63 0%, #6d4c41 100%); border: 2px solid #5d4037; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); flex-shrink: 0; }
+
+    /* ── Settings.css ── */
+    .settings-panel { background: linear-gradient(135deg, #263238 0%, #37474f 100%); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); color: white; }
+    .settings-panel h3 { margin-top: 0; margin-bottom: 16px; text-align: center; color: #ffd700; }
+    .setting-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 8px; }
+    .setting-row:last-child { border-bottom: none; margin-bottom: 0; }
+    .setting-row label { font-size: 0.95rem; }
+    .setting-row select, .setting-row input { background: #455a64; border: 1px solid #607d8b; border-radius: 6px; padding: 8px 12px; color: white; font-size: 0.9rem; min-width: 120px; }
+    .setting-row select:disabled, .setting-row input:disabled { opacity: 0.5; cursor: not-allowed; }
+    .setting-row select:focus, .setting-row input:focus { outline: none; border-color: #ffd700; }
+    .setting-row input[type="number"] { width: 80px; text-align: center; min-width: unset; }
+    .setting-row .custom-input { width: 100px; margin-left: auto; }
+
+    /* ── Timer.css ── */
+    .timer { display: inline-flex; align-items: center; padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; letter-spacing: 0.03em; transition: background 0.5s, color 0.5s; }
+    .timer-normal   { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.87); }
+    .timer-warning  { background: rgba(255,152,0,0.25); color: #ffb74d; animation: pulse 1s ease-in-out infinite; }
+    .timer-critical { background: rgba(244,67,54,0.3);  color: #ef5350; animation: pulse 0.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    'use strict';
+
+    /* ═══════════════════════════════════════════════════════════
+       GAME LOGIC
+    ═══════════════════════════════════════════════════════════ */
+
+    const COLORS = ['red', 'blue', 'orange', 'black'];
+    const COLOR_ORDER = { red: 0, blue: 1, orange: 2, black: 3 };
+
+    const DEFAULT_SETTINGS = {
+      numberOfPlayers: 2,
+      initialTilesPerPlayer: 14,
+      minimumInitialMeldValue: 30,
+      tilesPerColor: 2,
+      numberOfJokers: 2,
+      timePerTurn: null
+    };
+
+    function generateId() {
+      return Math.random().toString(36).slice(2, 11) + Math.random().toString(36).slice(2, 11);
+    }
+
+    function createTilePool(s) {
+      const tiles = [];
+      for (const color of COLORS)
+        for (let copy = 0; copy < s.tilesPerColor; copy++)
+          for (let n = 1; n <= 13; n++)
+            tiles.push({ id: generateId(), color, number: n, isJoker: false });
+      for (let i = 0; i < s.numberOfJokers; i++)
+        tiles.push({ id: generateId(), color: i % 2 === 0 ? 'red' : 'black', number: 0, isJoker: true });
+      return tiles;
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function dealTiles(pool, count) {
+      return { drawn: pool.slice(0, count), remaining: pool.slice(count) };
+    }
+
+    function isValidRun(tiles) {
+      if (tiles.length < 3) return false;
+      const nj = tiles.filter(t => !t.isJoker);
+      if (nj.length === 0) return true;
+      const color = nj[0].color;
+      if (!nj.every(t => t.color === color)) return false;
+      const sorted = [...nj].sort((a, b) => a.number - b.number);
+      const nums = sorted.map(t => t.number);
+      const min = nums[0], max = nums[nums.length - 1];
+      if (max > 13 || min < 1) return false;
+      if (new Set(nums).size !== nums.length) return false;
+      const range = max - min + 1;
+      if (range > tiles.length) return false;
+      return (range - nj.length) <= (tiles.length - nj.length);
+    }
+
+    function isValidGroup(tiles) {
+      if (tiles.length < 3 || tiles.length > 4) return false;
+      const nj = tiles.filter(t => !t.isJoker);
+      if (nj.length === 0) return true;
+      const num = nj[0].number;
+      if (!nj.every(t => t.number === num)) return false;
+      const colors = nj.map(t => t.color);
+      return new Set(colors).size === colors.length;
+    }
+
+    function isValidSet(tiles) { return isValidRun(tiles) || isValidGroup(tiles); }
+    function isBoardValid(board) { return board.every(s => isValidSet(s.tiles)); }
+    function checkWinner(player) { return player.hand.length === 0; }
+
+    function calcPlayedValue(board, turnStartHand, currentHand) {
+      const startIds = new Set(turnStartHand.map(t => t.id));
+      const currIds  = new Set(currentHand.map(t => t.id));
+      const playedIds = new Set([...startIds].filter(id => !currIds.has(id)));
+      let val = 0;
+      for (const set of board)
+        for (const tile of set.tiles)
+          if (playedIds.has(tile.id)) val += tile.isJoker ? 0 : tile.number;
+      return val;
+    }
+
+    function meetsInitialMeld(board, turnStartHand, currentHand, min) {
+      return calcPlayedValue(board, turnStartHand, currentHand) >= min;
+    }
+
+    function sortByColor(tiles) {
+      return [...tiles].sort((a, b) => {
+        if (a.isJoker !== b.isJoker) return a.isJoker ? 1 : -1;
+        const cd = COLOR_ORDER[a.color] - COLOR_ORDER[b.color];
+        return cd !== 0 ? cd : a.number - b.number;
+      });
+    }
+
+    function sortByNumber(tiles) {
+      return [...tiles].sort((a, b) => {
+        if (a.isJoker !== b.isJoker) return a.isJoker ? 1 : -1;
+        const nd = a.number - b.number;
+        return nd !== 0 ? nd : COLOR_ORDER[a.color] - COLOR_ORDER[b.color];
+      });
+    }
+
+    function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+    function initGame(playerNames, s) {
+      let pool = shuffle(createTilePool(s));
+      const players = playerNames.map(name => {
+        const { drawn, remaining } = dealTiles(pool, s.initialTilesPerPlayer);
+        pool = remaining;
+        return { id: generateId(), name, hand: drawn, hasPlayedInitialMeld: false, isActive: true };
+      });
+      return {
+        id: generateId(), players, currentPlayerIndex: 0,
+        board: [], pool, settings: deepClone(s), status: 'playing',
+        winner: null, turnStartBoard: [], turnStartHand: [...players[0].hand]
+      };
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       GLOBAL STATE
+    ═══════════════════════════════════════════════════════════ */
+
+    let gameState = null;
+    let settings  = { ...DEFAULT_SETTINGS };
+    let message   = 'Start a new game!';
+
+    const ui = {
+      selectedTiles: [],
+      playerNames: ['Player 1', 'Player 2'],
+      showSettings: false,
+      sortModes: {},      // playerId → 'color' | 'number'
+      customModes: { minimumMeld: false, numberOfJokers: false, timePerTurn: false }
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       TIMER
+    ═══════════════════════════════════════════════════════════ */
+
+    const tmr = { interval: null, left: 0, total: 1, expired: false, key: null };
+
+    function timerStart(seconds, key) {
+      clearInterval(tmr.interval);
+      tmr.left    = Math.max(0, seconds);
+      tmr.total   = Math.max(1, seconds);
+      tmr.expired = false;
+      tmr.key     = key;
+      tmr.interval = setInterval(() => {
+        if (tmr.left > 0) tmr.left--;
+        timerUpdateDisplay();
+        if (tmr.left <= 0 && !tmr.expired) {
+          tmr.expired = true;
+          clearInterval(tmr.interval);
+          tmr.interval = null;
+          // Force draw tile and re-render
+          actionDrawTile();
+          render();
+        }
+      }, 1000);
+      timerUpdateDisplay();
+    }
+
+    function timerStop() {
+      clearInterval(tmr.interval);
+      tmr.interval = null;
+    }
+
+    function timerKey() {
+      return gameState ? `${gameState.currentPlayerIndex}-${gameState.id}` : null;
+    }
+
+    function timerMaybeReset() {
+      if (!gameState || gameState.settings.timePerTurn === null || gameState.status !== 'playing') {
+        timerStop();
+        return;
+      }
+      const k = timerKey();
+      if (k !== tmr.key) {
+        timerStart(gameState.settings.timePerTurn, k);
+      } else {
+        timerUpdateDisplay();
+      }
+    }
+
+    function timerUpdateDisplay() {
+      const el = document.getElementById('timer-display');
+      if (!el) return;
+      const t = tmr.left;
+      const pct = Math.round((t / tmr.total) * 100);
+      const urgency = pct <= 10 ? 'critical' : pct <= 25 ? 'warning' : 'normal';
+      const mins = Math.floor(t / 60);
+      const secs = t % 60;
+      const disp = mins > 0 ? `${mins}:${String(secs).padStart(2, '0')}` : `${t}s`;
+      el.className = `timer timer-${urgency}`;
+      el.textContent = `\u23F1 ${disp}`;
+      el.setAttribute('aria-label', `${t} seconds remaining`);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       GAME ACTIONS
+    ═══════════════════════════════════════════════════════════ */
+
+    function actionStartGame() {
+      const names = uiPlayerNames();
+      gameState = initGame(names, deepClone(settings));
+      message = `${names[0]}'s turn`;
+      ui.selectedTiles = [];
+      ui.sortModes = {};
+      tmr.key = null;
+    }
+
+    function actionResetGame() {
+      timerStop();
+      tmr.key   = null;
+      gameState = null;
+      message   = 'Start a new game!';
+      ui.selectedTiles = [];
+    }
+
+    function actionDrawTile() {
+      if (!gameState) return;
+      if (gameState.pool.length === 0) {
+        message = 'No more tiles in the pool!';
+        return;
+      }
+      const gs = deepClone(gameState);
+      // Reset board and hand to turn-start state before penalising
+      gs.board = gs.turnStartBoard.map(s => ({ ...s, tiles: [...s.tiles] }));
+      gs.players[gs.currentPlayerIndex].hand = [...gs.turnStartHand];
+
+      const { drawn, remaining } = dealTiles(gs.pool, 1);
+      const cp = gs.players[gs.currentPlayerIndex];
+      cp.hand = sortByColor([...cp.hand, ...drawn]);
+      gs.pool = remaining;
+
+      // Advance to next player
+      gs.currentPlayerIndex = (gs.currentPlayerIndex + 1) % gs.players.length;
+      gs.turnStartBoard = gs.board.map(s => ({ ...s, tiles: [...s.tiles] }));
+      gs.turnStartHand  = [...gs.players[gs.currentPlayerIndex].hand];
+
+      gameState = gs;
+      ui.selectedTiles = [];
+      message = "Drew a tile. Next player's turn.";
+      tmr.key = null; // force timer reset
+    }
+
+    function actionEndTurn() {
+      if (!gameState) return false;
+      const cp = gameState.players[gameState.currentPlayerIndex];
+
+      if (!isBoardValid(gameState.board)) {
+        message = 'Invalid board! All sets must be valid runs or groups.';
+        return false;
+      }
+
+      const tilesPlayed = gameState.turnStartHand.length - cp.hand.length;
+
+      if (!cp.hasPlayedInitialMeld) {
+        if (!meetsInitialMeld(
+              gameState.board, gameState.turnStartHand,
+              cp.hand, gameState.settings.minimumInitialMeldValue)) {
+          if (tilesPlayed > 0) {
+            message = `Initial meld must be at least ${gameState.settings.minimumInitialMeldValue} points!`;
+            return false;
+          }
+        }
+      }
+
+      if (checkWinner(cp)) {
+        gameState = { ...gameState, status: 'finished', winner: cp.id };
+        message = `${cp.name} wins!`;
+        timerStop();
+        return true;
+      }
+
+      const gs = deepClone(gameState);
+      if (!gs.players[gs.currentPlayerIndex].hasPlayedInitialMeld && tilesPlayed > 0)
+        gs.players[gs.currentPlayerIndex].hasPlayedInitialMeld = true;
+
+      gs.currentPlayerIndex = (gs.currentPlayerIndex + 1) % gs.players.length;
+      gs.turnStartBoard = gs.board.map(s => ({ ...s, tiles: [...s.tiles] }));
+      gs.turnStartHand  = [...gs.players[gs.currentPlayerIndex].hand];
+
+      gameState = gs;
+      ui.selectedTiles = [];
+      message = `${gameState.players[gameState.currentPlayerIndex].name}'s turn`;
+      tmr.key = null; // force timer reset
+      return true;
+    }
+
+    function actionResetTurn() {
+      if (!gameState) return;
+      const gs = deepClone(gameState);
+      gs.board = gs.turnStartBoard.map(s => ({ ...s, tiles: [...s.tiles] }));
+      gs.players[gs.currentPlayerIndex].hand = [...gs.turnStartHand];
+      gameState = gs;
+      ui.selectedTiles = [];
+      message = 'Turn reset. Try again!';
+    }
+
+    function actionPlaceTileFromHand(tileId, setId, position) {
+      if (!gameState) return;
+      const gs = deepClone(gameState);
+      const cp = gs.players[gs.currentPlayerIndex];
+      const idx = cp.hand.findIndex(t => t.id === tileId);
+      if (idx === -1) return;
+      const tile = cp.hand.splice(idx, 1)[0];
+      if (setId) {
+        const set = gs.board.find(s => s.id === setId);
+        if (set) {
+          if (position !== undefined) set.tiles.splice(position, 0, tile);
+          else set.tiles.push(tile);
+        }
+      } else {
+        gs.board.push({ id: generateId(), tiles: [tile] });
+      }
+      gameState = gs;
+    }
+
+    function actionMoveTileOnBoard(tileId, fromSetId, toSetId, position) {
+      if (!gameState) return;
+      const gs = deepClone(gameState);
+      const fromSet = gs.board.find(s => s.id === fromSetId);
+      if (!fromSet) return;
+      const idx = fromSet.tiles.findIndex(t => t.id === tileId);
+      if (idx === -1) return;
+      const tile = fromSet.tiles.splice(idx, 1)[0];
+      if (fromSet.tiles.length === 0)
+        gs.board = gs.board.filter(s => s.id !== fromSetId);
+      const toSet = gs.board.find(s => s.id === toSetId);
+      if (toSet) {
+        if (position !== undefined) toSet.tiles.splice(position, 0, tile);
+        else toSet.tiles.push(tile);
+      }
+      gameState = gs;
+    }
+
+    function actionReturnTileToHand(tileId, setId) {
+      if (!gameState) return;
+      const turnStartIds = new Set(gameState.turnStartHand.map(t => t.id));
+      if (!turnStartIds.has(tileId)) {
+        message = "Can't return tiles that weren't yours this turn!";
+        return;
+      }
+      const gs = deepClone(gameState);
+      const set = gs.board.find(s => s.id === setId);
+      if (!set) return;
+      const idx = set.tiles.findIndex(t => t.id === tileId);
+      if (idx === -1) return;
+      const tile = set.tiles.splice(idx, 1)[0];
+      if (set.tiles.length === 0)
+        gs.board = gs.board.filter(s => s.id !== setId);
+      const cp = gs.players[gs.currentPlayerIndex];
+      cp.hand = sortByColor([...cp.hand, tile]);
+      gameState = gs;
+    }
+
+    function actionCreateNewSet(tileIds) {
+      if (!gameState || tileIds.length === 0) return;
+      const gs = deepClone(gameState);
+      const cp = gs.players[gs.currentPlayerIndex];
+      const tiles = [];
+      for (const tid of tileIds) {
+        const idx = cp.hand.findIndex(t => t.id === tid);
+        if (idx !== -1) tiles.push(cp.hand.splice(idx, 1)[0]);
+      }
+      if (tiles.length > 0)
+        gs.board.push({ id: generateId(), tiles });
+      gameState = gs;
+      ui.selectedTiles = [];
+    }
+
+    function canEndTurn() {
+      if (!gameState) return false;
+      const cp = gameState.players[gameState.currentPlayerIndex];
+      const played = gameState.turnStartHand.length - cp.hand.length;
+      return played > 0 && isBoardValid(gameState.board);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       HELPERS
+    ═══════════════════════════════════════════════════════════ */
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function uiPlayerNames() {
+      const names = ui.playerNames.slice(0, settings.numberOfPlayers);
+      while (names.length < settings.numberOfPlayers)
+        names.push(`Player ${names.length + 1}`);
+      return names;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       RENDERING
+    ═══════════════════════════════════════════════════════════ */
+
+    function renderTile(tile, inHand, setId, selected) {
+      const cls = ['tile', tile.color,
+        tile.isJoker ? 'joker' : '',
+        selected     ? 'selected' : ''
+      ].filter(Boolean).join(' ');
+      const inner = tile.isJoker
+        ? `<span class="joker-symbol">&#9786;</span>`
+        : `<span class="tile-number">${tile.number}</span>`;
+      const src  = inHand ? 'hand' : 'board';
+      const sid  = setId  ? ` data-set-id="${setId}"` : '';
+      return `<div class="${cls}" data-tile-id="${tile.id}" data-source="${src}"${sid} draggable="true">${inner}</div>`;
+    }
+
+    function renderTileSet(set) {
+      const valid = isValidSet(set.tiles);
+      let html = `<div class="tile-set ${valid ? 'valid' : 'invalid'}" data-set-id="${set.id}">`;
+      for (let i = 0; i < set.tiles.length; i++) {
+        html += `<div class="drop-zone" data-set-id="${set.id}" data-position="${i}"></div>`;
+        html += renderTile(set.tiles[i], false, set.id, false);
+      }
+      html += `<div class="drop-zone end" data-set-id="${set.id}" data-position="${set.tiles.length}"></div>`;
+      html += `</div>`;
+      return html;
+    }
+
+    function renderBoard(board) {
+      const inner = board.length === 0
+        ? `<div class="board-placeholder">
+             <p>Drop tiles here to create sets</p>
+             <p class="hint">Valid sets: 3+ tiles of same number (different colors) or 3+ consecutive numbers (same color)</p>
+           </div>`
+        : `<div class="board-sets">${board.map(renderTileSet).join('')}</div>`;
+      return `<div class="game-board" id="game-board">${inner}</div>`;
+    }
+
+    function renderPlayerHand(player, isCurrent) {
+      const selected = isCurrent ? ui.selectedTiles : [];
+      const mode     = ui.sortModes[player.id] || 'color';
+      const sorted   = mode === 'color' ? sortByColor(player.hand) : sortByNumber(player.hand);
+
+      const tilesHtml = isCurrent
+        ? sorted.map(t => renderTile(t, true, null, selected.includes(t.id))).join('')
+        : `<div class="hidden-tiles">${'<div class="hidden-tile"></div>'.repeat(player.hand.length)}</div>`;
+
+      const sortBtns = isCurrent
+        ? `<div class="sort-buttons">
+             <button class="sort-btn${mode === 'color'  ? ' active' : ''}" data-sort="color"  data-player-id="${player.id}" title="Sort by color first, then number">&#127912; Color</button>
+             <button class="sort-btn${mode === 'number' ? ' active' : ''}" data-sort="number" data-player-id="${player.id}" title="Sort by number first, then color">&#128290; Number</button>
+           </div>`
+        : '';
+
+      return `<div class="player-hand ${isCurrent ? 'active' : 'inactive'}" data-player-id="${player.id}">
+        <div class="player-info">
+          <h3>${esc(player.name)}</h3>
+          ${isCurrent ? '<span class="turn-indicator">Your Turn</span>' : ''}
+          <span class="tile-count">${player.hand.length} tiles</span>
+          ${sortBtns}
+        </div>
+        <div class="hand-tiles">${tilesHtml}</div>
+      </div>`;
+    }
+
+    function renderSettings() {
+      const s  = settings;
+      const cm = ui.customModes;
+      const isPredefinedMeld  = [0, 30, 40, 50].includes(s.minimumInitialMeldValue);
+      const isPredefinedJoker = [0, 2, 4].includes(s.numberOfJokers);
+      const isPredefinedTime  = s.timePerTurn === null || [30, 60, 120, 300].includes(s.timePerTurn);
+
+      const showCustMeld  = cm.minimumMeld    || !isPredefinedMeld;
+      const showCustJoker = cm.numberOfJokers || !isPredefinedJoker;
+      const showCustTime  = cm.timePerTurn    || !isPredefinedTime;
+
+      const meldVal  = showCustMeld  ? 'custom' : s.minimumInitialMeldValue;
+      const jokerVal = showCustJoker ? 'custom' : s.numberOfJokers;
+      const timeVal  = showCustTime  ? 'custom' : (s.timePerTurn ?? 'none');
+
+      const sel = (val, opt) => val == opt ? ' selected' : '';
+
+      return `<div class="settings-panel">
+        <h3>Game Settings</h3>
+        <div class="setting-row">
+          <label for="s-players">Number of Players</label>
+          <select id="s-players" data-setting="numberOfPlayers">
+            <option value="2"${sel(s.numberOfPlayers,2)}>2 Players</option>
+            <option value="3"${sel(s.numberOfPlayers,3)}>3 Players</option>
+            <option value="4"${sel(s.numberOfPlayers,4)}>4 Players</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label for="s-tiles">Initial Tiles per Player</label>
+          <input id="s-tiles" type="number" min="7" max="21" value="${s.initialTilesPerPlayer}" data-setting="initialTilesPerPlayer" />
+        </div>
+        <div class="setting-row">
+          <label for="s-meld">Minimum Initial Meld Value</label>
+          <select id="s-meld" data-setting="minimumInitialMeldValue" data-custom="minimumMeld">
+            <option value="0"${sel(meldVal,0)}>No minimum</option>
+            <option value="30"${sel(meldVal,30)}>30 points</option>
+            <option value="40"${sel(meldVal,40)}>40 points</option>
+            <option value="50"${sel(meldVal,50)}>50 points</option>
+            <option value="custom"${meldVal==='custom'?' selected':''}>Custom</option>
+          </select>
+          ${showCustMeld ? `<input type="number" min="0" value="${s.minimumInitialMeldValue}" data-custom-setting="minimumInitialMeldValue" placeholder="Custom value" class="custom-input" />` : ''}
+        </div>
+        <div class="setting-row">
+          <label for="s-jokers">Number of Jokers</label>
+          <select id="s-jokers" data-setting="numberOfJokers" data-custom="numberOfJokers">
+            <option value="0"${sel(jokerVal,0)}>No Jokers</option>
+            <option value="2"${sel(jokerVal,2)}>2 Jokers</option>
+            <option value="4"${sel(jokerVal,4)}>4 Jokers</option>
+            <option value="custom"${jokerVal==='custom'?' selected':''}>Custom</option>
+          </select>
+          ${showCustJoker ? `<input type="number" min="0" value="${s.numberOfJokers}" data-custom-setting="numberOfJokers" placeholder="Custom value" class="custom-input" />` : ''}
+        </div>
+        <div class="setting-row">
+          <label for="s-time">Time per Turn</label>
+          <select id="s-time" data-setting="timePerTurn" data-custom="timePerTurn">
+            <option value="none"${timeVal==='none'?' selected':''}>No limit</option>
+            <option value="30"${sel(timeVal,30)}>30 seconds</option>
+            <option value="60"${sel(timeVal,60)}>1 minute</option>
+            <option value="120"${sel(timeVal,120)}>2 minutes</option>
+            <option value="300"${sel(timeVal,300)}>5 minutes</option>
+            <option value="custom"${timeVal==='custom'?' selected':''}>Custom</option>
+          </select>
+          ${showCustTime ? `<input type="number" min="1" value="${s.timePerTurn || ''}" data-custom-setting="timePerTurn" placeholder="Custom seconds" class="custom-input" />` : ''}
+        </div>
+      </div>`;
+    }
+
+    function renderSetup() {
+      const names = uiPlayerNames();
+      const inputs = names.map((name, i) =>
+        `<div class="player-name-input">
+           <label for="pname-${i}">Player ${i + 1}</label>
+           <input id="pname-${i}" type="text" value="${esc(name)}" placeholder="Player ${i+1}" data-player-index="${i}" />
+         </div>`
+      ).join('');
+
+      return `<div class="game-container">
+        <div class="game-header">
+          <h1>&#127918; Rummikub</h1>
+          <p>The classic tile game</p>
+        </div>
+        <div class="setup-panel">
+          <button class="toggle-settings-btn" id="toggle-settings-btn">
+            ${ui.showSettings ? 'Hide Settings' : 'Show Settings'} &#9881;&#65039;
+          </button>
+          ${ui.showSettings ? renderSettings() : ''}
+          <div class="player-names-setup">
+            <h3>Player Names</h3>
+            ${inputs}
+          </div>
+          <button class="start-btn" id="start-btn">Start Game &#127922;</button>
+        </div>
+      </div>`;
+    }
+
+    function renderGame() {
+      const gs = gameState;
+      const timerHtml = gs.settings.timePerTurn !== null
+        ? `<span class="timer timer-normal" id="timer-display">&#9201; ${gs.settings.timePerTurn}s</span>`
+        : '';
+
+      const header = `<div class="game-header">
+        <h1>&#127918; Rummikub</h1>
+        <div class="game-info">
+          <span class="pool-count">Pool: ${gs.pool.length} tiles</span>
+          <span class="message">${esc(message)}</span>
+          ${timerHtml}
+        </div>
+      </div>`;
+
+      if (gs.status === 'finished') {
+        const winner = gs.players.find(p => p.id === gs.winner);
+        return `<div class="game-container">
+          ${header}
+          <div class="game-over">
+            <h2>&#127881; Game Over! &#127881;</h2>
+            <p class="winner-message">${esc(winner ? winner.name : 'Unknown')} wins!</p>
+            <button class="new-game-btn" id="new-game-btn">New Game</button>
+          </div>
+        </div>`;
+      }
+
+      const drawDis    = gs.pool.length === 0 ? ' disabled' : '';
+      const endDis     = canEndTurn() ? '' : ' disabled';
+      const selCount   = ui.selectedTiles.length;
+      const selBtns    = selCount > 0
+        ? `<button class="create-set-btn" id="create-set-btn" title="Create a new set from selected tiles">Create Set (${selCount}) &#127183;</button>
+           <button class="clear-selection-btn" id="clear-sel-btn" title="Deselect all">Clear &#10005;</button>`
+        : '';
+
+      const controls = `<div class="turn-controls">
+        <button class="draw-btn" id="draw-btn"${drawDis}>Draw Tile &#128229;</button>
+        <button class="reset-btn" id="reset-btn">Reset Turn &#8617;&#65039;</button>
+        ${selBtns}
+        <button class="end-turn-btn" id="end-turn-btn"${endDis}>End Turn &#10003;</button>
+      </div>`;
+
+      const hands = gs.players.map((p, i) =>
+        renderPlayerHand(p, i === gs.currentPlayerIndex)
+      ).join('');
+
+      return `<div class="game-container">
+        ${header}
+        ${renderBoard(gs.board)}
+        ${controls}
+        <div class="players-area">${hands}</div>
+        <button class="quit-btn" id="quit-btn">Quit Game</button>
+      </div>`;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       DRAG STATE
+    ═══════════════════════════════════════════════════════════ */
+
+    let drag = null; // { tileId, fromSetId: null|string }
+
+    /* ═══════════════════════════════════════════════════════════
+       RENDER + ATTACH LISTENERS
+    ═══════════════════════════════════════════════════════════ */
+
+    function render() {
+      document.getElementById('app').innerHTML = gameState ? renderGame() : renderSetup();
+      attachListeners();
+      timerMaybeReset();
+      // Sync timer display immediately after render
+      if (gameState && gameState.settings.timePerTurn !== null && gameState.status === 'playing')
+        timerUpdateDisplay();
+    }
+
+    function attachListeners() {
+      if (!gameState) { attachSetupListeners(); } else { attachGameListeners(); }
+    }
+
+    /* ── Setup screen listeners ── */
+    function attachSetupListeners() {
+      document.getElementById('toggle-settings-btn').addEventListener('click', () => {
+        ui.showSettings = !ui.showSettings;
+        render();
+      });
+
+      document.getElementById('start-btn').addEventListener('click', () => {
+        actionStartGame();
+        render();
+      });
+
+      // Player name inputs — update state but don't re-render on each keystroke
+      document.querySelectorAll('[data-player-index]').forEach(el => {
+        el.addEventListener('input', e => {
+          ui.playerNames[parseInt(e.target.dataset.playerIndex)] = e.target.value;
+        });
+      });
+
+      // Settings selects
+      document.querySelectorAll('[data-setting]').forEach(el => {
+        el.addEventListener('change', e => {
+          const key    = e.target.dataset.setting;
+          const custom = e.target.dataset.custom;
+          const val    = e.target.value;
+
+          if (val === 'custom' && custom) {
+            ui.customModes[custom] = true;
+            render();
+            return;
+          }
+          if (custom) ui.customModes[custom] = false;
+
+          if (key === 'numberOfPlayers') {
+            settings.numberOfPlayers = parseInt(val);
+            while (ui.playerNames.length < settings.numberOfPlayers)
+              ui.playerNames.push(`Player ${ui.playerNames.length + 1}`);
+          } else if (key === 'initialTilesPerPlayer') {
+            const n = parseInt(val);
+            if (!isNaN(n)) settings.initialTilesPerPlayer = n;
+          } else if (key === 'minimumInitialMeldValue') {
+            settings.minimumInitialMeldValue = parseInt(val);
+          } else if (key === 'numberOfJokers') {
+            settings.numberOfJokers = parseInt(val);
+          } else if (key === 'timePerTurn') {
+            settings.timePerTurn = val === 'none' ? null : parseInt(val);
+          }
+          render();
+        });
+
+        // Also handle number inputs with data-setting inline
+        if (el.tagName === 'INPUT') {
+          el.addEventListener('input', e => {
+            const key = e.target.dataset.setting;
+            const n   = parseInt(e.target.value);
+            if (!isNaN(n) && key) settings[key] = n;
+          });
+        }
+      });
+
+      // Custom value inputs (shown below selects when "Custom" chosen)
+      document.querySelectorAll('[data-custom-setting]').forEach(el => {
+        el.addEventListener('input', e => {
+          const key = e.target.dataset.customSetting;
+          const n   = parseInt(e.target.value);
+          if (isNaN(n)) return;
+          if (key === 'timePerTurn') {
+            if (n > 0) settings.timePerTurn = n;
+          } else {
+            if (n >= 0) settings[key] = n;
+          }
+        });
+      });
+    }
+
+    /* ── Game screen listeners ── */
+    function attachGameListeners() {
+      const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+
+      on('draw-btn',      () => { actionDrawTile();  render(); });
+      on('reset-btn',     () => { actionResetTurn(); render(); });
+      on('end-turn-btn',  () => { actionEndTurn();   render(); });
+      on('quit-btn',      () => { actionResetGame(); render(); });
+      on('new-game-btn',  () => { actionResetGame(); render(); });
+      on('create-set-btn',() => { actionCreateNewSet(ui.selectedTiles); render(); });
+      on('clear-sel-btn', () => { ui.selectedTiles = []; render(); });
+
+      // Sort buttons
+      document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          ui.sortModes[e.currentTarget.dataset.playerId] = e.currentTarget.dataset.sort;
+          render();
+        });
+      });
+
+      // Hand tile clicks — select / deselect
+      document.querySelectorAll('[data-source="hand"]').forEach(tile => {
+        tile.addEventListener('click', e => {
+          e.stopPropagation();
+          const tid = tile.dataset.tileId;
+          ui.selectedTiles = ui.selectedTiles.includes(tid)
+            ? ui.selectedTiles.filter(id => id !== tid)
+            : [...ui.selectedTiles, tid];
+          render();
+        });
+      });
+
+      // Board tile clicks — return to hand if played this turn
+      document.querySelectorAll('[data-source="board"]').forEach(tile => {
+        tile.addEventListener('click', e => {
+          e.stopPropagation();
+          const tid   = tile.dataset.tileId;
+          const sid   = tile.dataset.setId;
+          const tsIds = new Set(gameState.turnStartHand.map(t => t.id));
+          if (tsIds.has(tid)) {
+            actionReturnTileToHand(tid, sid);
+            render();
+          }
+        });
+      });
+
+      attachDragListeners();
+    }
+
+    function attachDragListeners() {
+      // Hand tiles
+      document.querySelectorAll('[data-source="hand"]').forEach(tile => {
+        tile.addEventListener('dragstart', e => {
+          drag = { tileId: tile.dataset.tileId, fromSetId: null };
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', tile.dataset.tileId);
+        });
+        tile.addEventListener('dragend', () => { drag = null; });
+      });
+
+      // Board tiles
+      document.querySelectorAll('[data-source="board"]').forEach(tile => {
+        tile.addEventListener('dragstart', e => {
+          drag = { tileId: tile.dataset.tileId, fromSetId: tile.dataset.setId };
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', tile.dataset.tileId);
+          e.stopPropagation();
+        });
+        tile.addEventListener('dragend', () => { drag = null; });
+      });
+
+      // Drop zones
+      document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          zone.classList.add('active');
+        });
+        zone.addEventListener('dragleave', () => {
+          zone.classList.remove('active');
+        });
+        zone.addEventListener('drop', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          zone.classList.remove('active');
+          if (!drag) return;
+          const { tileId, fromSetId } = drag;
+          const toSetId  = zone.dataset.setId;
+          const position = parseInt(zone.dataset.position);
+          if (fromSetId === null) {
+            // From hand → insert into set
+            actionPlaceTileFromHand(tileId, toSetId, position);
+          } else if (fromSetId !== toSetId) {
+            // From board → move to different set
+            actionMoveTileOnBoard(tileId, fromSetId, toSetId, position);
+          }
+          // Same-set drop → no-op
+          drag = null;
+          ui.selectedTiles = [];
+          render();
+        });
+      });
+
+      // Board background — drop from hand creates a new set
+      const boardEl = document.getElementById('game-board');
+      if (!boardEl) return;
+      boardEl.addEventListener('dragover', e => {
+        if (e.target.closest('.tile-set') || e.target.closest('.drop-zone')) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        boardEl.classList.add('drag-over');
+      });
+      boardEl.addEventListener('dragleave', e => {
+        if (!boardEl.contains(e.relatedTarget)) boardEl.classList.remove('drag-over');
+      });
+      boardEl.addEventListener('drop', e => {
+        boardEl.classList.remove('drag-over');
+        if (e.target.closest('.tile-set') || e.target.closest('.drop-zone')) return;
+        e.preventDefault();
+        if (!drag) return;
+        const { tileId, fromSetId } = drag;
+        if (fromSetId === null) {
+          // Only hand tiles create new sets on the board surface
+          actionPlaceTileFromHand(tileId);
+        }
+        drag = null;
+        ui.selectedTiles = [];
+        render();
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════════════════════ */
+
+    render();
+  </script>
+</body>
 </html>
